@@ -124,6 +124,7 @@ async def displayMedia(self, folder_name, media_number, guild_id, message):
         await new_message.add_reaction('◀')
         await new_message.add_reaction('▶')
         await new_message.add_reaction('⏭')
+        await new_message.add_reaction('🔄')
 
         def check(reaction, user):
             return user == message.author
@@ -148,7 +149,15 @@ async def displayMedia(self, folder_name, media_number, guild_id, message):
                 if i != len(media_list)-1:
                     i = len(media_list)-1
                     await new_message.edit(content=getMessageToSend(i))
-            
+            elif str(reaction) == '🔄':
+                randomNum = i
+                while randomNum == i:
+                    randomNum = random.randint(0, len(media_list)-1)
+
+                i = randomNum
+                
+                await new_message.edit(content=getMessageToSend(i))
+
             try:
                 reaction, user = await self.client.wait_for('reaction_add', timeout = 30.0, check = check)
                 await new_message.remove_reaction(reaction, user)
