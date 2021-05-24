@@ -7,9 +7,9 @@ def get_prefix(client, message):
     with open('prefixes.json', 'r') as prefixFile:
         prefixes = json.load(prefixFile)
 
-    if message.guild:
+    try:
         return prefixes[str(message.guild.id)]
-    else:
+    except:
         return '!'
 
 with open('config.json', "r") as configFile:
@@ -20,7 +20,7 @@ with open('config.json', "r") as configFile:
 def is_it_jake(ctx):
     return str(ctx.author.id) == JAKEID
 
-client = commands.Bot(command_prefix = get_prefix)
+client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents().all())
 
 # Reload config
 @client.command()
