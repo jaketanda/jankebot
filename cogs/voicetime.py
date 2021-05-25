@@ -201,6 +201,21 @@ async def getChart(guild, num_to_display):
     plt.ylabel('Total Time (Hours)')
 
     plt.subplots_adjust(bottom=0.3)
+    plt.rcParams.update({
+        "lines.color": "white",
+        "patch.edgecolor": "white",
+        "text.color": "black",
+        "axes.facecolor": "white",
+        "axes.edgecolor": "lightgray",
+        "axes.labelcolor": "white",
+        "xtick.color": "white",
+        "ytick.color": "white",
+        "grid.color": "lightgray",
+        "figure.facecolor": "black",
+        "figure.edgecolor": "black",
+        "savefig.facecolor": "black",
+        "savefig.edgecolor": "black"
+    })
 
     plt.title(title)
 
