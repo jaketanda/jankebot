@@ -1,6 +1,9 @@
 import discord
 import json
+import matplotlib.pyplot as plt
+import os
 from discord.ext import commands
+from discord import File
 
 def getPrefix(guild_id):
     with open('././prefixes.json', 'r') as f:
@@ -199,6 +202,57 @@ def displayLeaders(guild_id, counter_name, number_to_display):
         embed.set_footer(text=footer)
 
     return embed
+
+async def getChart(guild, guild_id, counter_name, num_to_display):
+    with open('././counters.json', 'r') as f:
+        counters = json.load(f)
+
+    counter = counters[guild_id][counter_name]
+    title = counter['title']
+    censored = counter['censored']
+
+    if censored:
+        return None
+
+    counter.pop('title', None)
+    counter.pop('emoji', None)
+    counter.pop('censored', None)
+    counter.pop('footer', None)
+
+    counter = sorted(counter.items(), key=lambda item: item[1], reverse=True)
+
+    if len(counter) > num_to_display:
+        left = list(range(1, num_to_display+1))
+        counter = counter[:num_to_display]
+    else:
+        left = list(range(1, len(counter)+1))
+
+    print(counter)
+
+    users = []
+    user_scores = []
+    for user_id, user_score in counter:
+        try:
+            user = await guild.fetch_member(int(user_id))
+            users.append(user.display_name)
+        except :
+            print('user not found')
+
+        user_scores.append(user_score)
+
+    print('generating')
+    print(left)
+    print(user_scores)
+    print(users)
+    plt.bar(left, user_scores, tick_label=users, color = ['green', 'blue', 'red', 'purple'])
+
+    plt.xlabel('Users')
+    plt.ylabel('Totals')
+
+    plt.title(title)
+
+    plt.savefig('chart.png',dpi=400)
+
 
 def getUserTotalCount(guild_id, counter_name, user_id):
     with open('././counters.json', 'r') as f:
@@ -445,6 +499,15 @@ class Counter(commands.Cog):
                         elif command.endswith('leaderboard'):
                             command = command[:-11]
                         await message.channel.send(embed = displayLeaders(guild_id, command, 10))
+
+                    elif command.endswith('c') or command.endswith('chart') or command.endswith('g') or command.endswith('graph'):
+                        if (command.endswith('c') or command.endswith('g')):
+                            command = command[:-1]
+                        else:
+                            command = command[:-5]
+                        await getChart(message.guild, guild_id, command, 10)
+                        await message.channel.send(file = discord.File("chart.png", "chart.png"))
+                        os.remove("chart.png")
                     
                     elif command.endswith(counter_names):
                         if isCensored(guild_id, command):
