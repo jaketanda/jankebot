@@ -3,6 +3,13 @@ from discord.ext import commands
 import json
 import random
 
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 async def confirmation(self, message, sentUser, channel, successMessage = ':white_check_mark: Operation successful', cancelledMessage = ':x: Operation cancelled'):
     new_message = await channel.send(message)
 
@@ -173,6 +180,13 @@ def get_media_folders(guildId):
         return list(media[str(guildId)].keys())
     return []
 
+def get_media_folder_size(guildId, folderName):
+    with open('././media.json', 'r') as f:
+        media = json.load(f)
+    if str(guildId) in media and len(media[str(guildId)]) > 0 and folderName in list(media[str(guildId)].keys()):
+        return len(media[str(guildId)][folderName])
+    return []
+
 def get_media(guild_id, folder):
     with open('././media.json', 'r') as f:
         media = json.load(f)
@@ -196,11 +210,11 @@ def add_media_with_description(guild_id, folder_name, media):
     description = ""
     counter = 0
     for arg in media:
-        if counter >= 3:
+        if counter >= 2:
             description += f'{str(arg)} '
         counter += 1
 
-    media_json[str(guild_id)][folder_name].append({"content": media[2], "description": description})
+    media_json[str(guild_id)][folder_name].append({"content": media[1], "description": description})
 
     with open ('././media.json', 'w') as f:
         json.dump(media_json, f, indent=4)
@@ -214,18 +228,18 @@ def remove_media(guild_id, folder_name, media_number):
     with open ('././media.json', 'w') as f:
         json.dump(media, f, indent=4)
 
-def updatedescription(args, discord_id):
+def updatedescription(folder, args, discord_id):
     with open('././media.json', 'r') as f:
         media_json = json.load(f)
 
     description = ""
     counter = 0
     for arg in args:
-        if counter > 2:
+        if counter > 1:
             description += f'{arg} '
         counter+=1
 
-    media_json[discord_id][args[0]][int(args[2])-1]["description"] = description
+    media_json[discord_id][folder][int(args[1])-1]["description"] = description
 
     with open ('././media.json', 'w') as f:
         json.dump(media_json, f, indent=4)
@@ -379,69 +393,76 @@ class Media(commands.Cog):
         with open('././prefixes.json', 'r') as f:
             prefixes = json.load(f)
 
+        guildId = str(message.guild.id)
+
         ctx = await self.client.get_context(message)
         if not ctx.valid:
-            if str(message.guild.id) in prefixes:    
-                prefix = str(prefixes.get(str(message.guild.id)))
+            if guildId in prefixes:    
+                prefix = prefixes.get(guildId)
             else:
                 prefix = '!'
 
             if message.content.lower().startswith(prefix):
-                args = message.content[len(prefix):].split()
-                folderName = args[0].lower()
-                
-                if folderName in (get_media_folders(message.guild.id)):
-                    print(message.content[len(prefix):])
-                    folderSize = len(get_media(message.guild.id, folderName))
+                messageArray = message.content.lower().split()
 
-                    if len(args) > 1:
-                        if args[1] == "add":
-                            if len(args) == 3:
-                                add_media(message.guild.id, folderName, args[2])
-                                await message.channel.purge(limit=1)
-                                await message.channel.send(f'Added media to {folderName}!')
-                            elif len(args) > 3:
-                                add_media_with_description(message.guild.id, folderName, args)
-                                await message.channel.purge(limit=1)
-                                await message.channel.send(f'Added media to {folderName}!')
-                            else:
-                                await message.channel.send(f':no_entry: Proper format: `{prefix}{folderName} add [content]`')
-                            return
+                command = messageArray[0][len(prefix):]
+                if len(messageArray) > 1:
+                    args = messageArray[1:]
+                else:
+                    args = None
 
-                        elif args[1] == "remove" or args[1] == "delete":
-                            if message.channel.permissions_for(message.author).manage_messages:
-                                if len(args) == 3:
-                                    if await areYouSure(self, f'delete {folderName} media number {args[2]}', message.author, message.channel, successMessage=f'Removed media `{args[2]}` from `{folderName}`'):
-                                        remove_media(message.guild.id, folderName, int(args[2]))
-                                else:
-                                    await message.channel.send(f':no_entry: Proper format: `{prefix}{folderName} remove [number to remove]`')
-                            return
+                folders = get_media_folders(guildId)
 
-                        elif args[1] == "list":
-                            await list_media(self, message, folderName)
-                            return
+                # Commands
+                if command in folders:
+                    folderSize = get_media_folder_size(guildId, command)
 
-                        elif args[1] == 'updatedescription' or args[1] == 'updatedesc' or args[1] == 'update' and len(args) >= 3:
-                            updatedescription(args, str(message.guild.id))
-                            await message.channel.send(f'Updated description for `{args[0]} {args[2]}`')
-                            return
-
+                    # [Folder name]
+                    if args == None:
+                        if folderSize <= 0:
+                            await ctx.send(f':no_entry: The {command} folder is empty! Do `.{command} add [media] [description]` to get started!')
                         else:
-                            medianum = int(args[1])-1
+                            mediaNumber = random.randint(0, folderSize-1)
+                            await displayMedia(self, command, mediaNumber, guildId, message)
 
-                    elif len(args) == 1 and folderSize != 0:
-                        medianum = random.randint(0, folderSize-1)
+                    # [Folder name] [Positive integer]
+                    elif RepresentsInt(args[0]):
+                        if folderSize <= 0:
+                            await ctx.send(f':no_entry: The {command} folder is empty! Do `.{command} add [media] [description]` to get started!')
+                        elif int(args[0]) > folderSize or int(args[0]) <= 0:
+                            await ctx.send(f':no_entry: Invalid number. Valid numbers: `1-{folderSize}`')
+                        else:
+                            await displayMedia(self, command, int(args[0])-1, guildId, message)
 
-                    if folderSize == 0:
-                        await message.channel.send(f':no_entry: The {folderName.capitalize()} folder is empty!' 
-                                                + f' Do `{prefix}{folderName.capitalize()} add [media] [description]` to get started!')
-                        return
-                    
-                    try:
-                        await displayMedia(self, args[0].lower(), medianum, message.guild.id, message)
-                        
-                    except:
-                        await message.channel.send(f':no_entry: Invalid number. Valid numbers: `1-{len(get_media(message.guild.id, args[0]))}`')
+                    # [Folder name] list
+                    elif args[0] == 'list':
+                        await list_media(self, message, command)
+
+                    # [Folder name] add [media] [Description (optional)]
+                    elif len(args) > 1 and args[0] == 'add':
+                        if len(args) > 2:
+                            add_media_with_description(guildId, command, args)
+                        else:
+                            add_media(guildId, command, args[1])
+                        await message.delete()
+                        await ctx.send(f'✅ Added media to `{command}`')
+
+                    # [Folder name] remove [Positive integer]
+                    elif len(args) == 2 and args[0] in ['remove', 'delete'] and RepresentsInt(args[1]):
+                        if int(args[1]) <= 0 or int(args[1]) > folderSize:
+                            await ctx.send(f':no_entry: Invalid number. Valid numbers: `1-{folderSize}`')
+                        else:
+                            remove_media(guildId, command, int(args[1]))
+                            await message.add_reaction('✅')
+
+                    # [Folder name] updatedescription [Positive integer] [New description]
+                    elif len(args) > 2 and args[0] in ['updatedescription', 'updatedesc', 'ud'] and RepresentsInt(args[1]):
+                        if int(args[1]) <= 0 or int(args[1]) > folderSize:
+                            await ctx.send(f':no_entry: Invalid number. Valid numbers: `1-{folderSize}`')
+                        else:
+                            updatedescription(command, args, guildId)
+                            await message.add_reaction('✅')
+                
 
 def setup(client):
     client.add_cog(Media(client))
