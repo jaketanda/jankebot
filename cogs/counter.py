@@ -227,8 +227,6 @@ async def getChart(guild, guild_id, counter_name, num_to_display):
     else:
         left = list(range(1, len(counter)+1))
 
-    print(counter)
-
     users = []
     user_scores = []
     for user_id, user_score in counter:
@@ -237,21 +235,22 @@ async def getChart(guild, guild_id, counter_name, num_to_display):
             users.append(user.display_name)
         except :
             print('user not found')
+            users.append(f'id:{user_id}')
 
         user_scores.append(user_score)
 
-    print('generating')
-    print(left)
-    print(user_scores)
-    print(users)
     plt.bar(left, user_scores, tick_label=users, color = ['green', 'blue', 'red', 'purple'])
 
     plt.xlabel('Users')
+    plt.xticks(left, users, rotation="vertical")
     plt.ylabel('Totals')
+
+    plt.subplots_adjust(bottom=0.3)
 
     plt.title(title)
 
-    plt.savefig('chart.png',dpi=400)
+    plt.savefig('chart.png')
+    plt.close()
 
 
 def getUserTotalCount(guild_id, counter_name, user_id):

@@ -1,6 +1,8 @@
 import discord
 import json
 import time
+import os
+import matplotlib.pyplot as plt
 from discord.ext import commands
 
 current_milli_time = lambda: int(round(time.time() * 1000))
@@ -156,6 +158,57 @@ def displayVoiceTimeLeaders(guild_id, is_censored, number_to_display):
             
     return embed
 
+async def getChart(guild, num_to_display):
+    with open('././voicetime.json', 'r') as f:
+        vtjson = json.load(f)
+
+    guild_id = str(guild.id)
+    title = f'Voice time for {guild.name}'
+
+    if guild_id in vtjson:
+        vtjson[guild_id].pop('censored', None)
+        vtjson[guild_id].pop('visible', None)
+    else:
+        return None
+
+    user_dict = {}
+    for key in vtjson[guild_id].keys():
+        user_dict[key] = getTotalTimeMilli(guild_id, key)
+    
+    # format: [('109060566210859008', 6193)]
+    user_dict = sorted(user_dict.items(), key=lambda item: item[1], reverse=True)
+
+    if len(user_dict) > num_to_display:
+        left = list(range(1, num_to_display+1))
+        user_dict = user_dict[:num_to_display]
+    else:
+        left = list(range(1, len(user_dict)+1))
+
+    users = []
+    user_times = []
+    for user_id, user_time in user_dict:
+        try:
+            user = await guild.fetch_member(int(user_id))
+            users.append(user.name)
+        except :
+            print('user not found')
+            users.append(f'id:{user_id}')
+
+        user_times.append(float(user_time)/1000/60/60)
+
+    plt.xlabel('Users')
+    plt.xticks(left, users, rotation="vertical")
+    plt.ylabel('Total Time (Hours)')
+
+    plt.subplots_adjust(bottom=0.3)
+
+    plt.title(title)
+
+    plt.bar(left, user_times, tick_label=users, color = ['green', 'blue', 'red', 'purple'])
+
+    plt.savefig(f'{guild_id}.png')
+    plt.close()
+
 class VoiceTime(commands.Cog):
     """Commands for viewing the amount of time spent in voice chat"""
     def __init__(self, client):
@@ -208,6 +261,27 @@ class VoiceTime(commands.Cog):
 
         elif ctx.channel.permissions_for(ctx.author).administrator:
             await ctx.author.send(embed=displayVoiceTimeLeaders(guild_id, False, total))
+
+    @commands.command(aliases=['vtg', 'vtc', 'voicetimegraph'])
+    @commands.has_permissions(attach_files=True)
+    async def voicetimechart(self, ctx, total=10):
+        """Displays the leaders for time spent in voice chat in barchart form
+        
+        Usage: `voicetimechart`
+        """
+
+        guild_id = str(ctx.guild.id)
+
+        if timeIsVisible(guild_id) and not timeIsCensored(guild_id):
+            await getChart(ctx.guild, total)
+            await ctx.reply(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
+            os.remove(f'{guild_id}.png')
+
+        elif ctx.channel.permissions_for(ctx.author).administrator:
+            await getChart(ctx.guild, total)
+            await ctx.author.send(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
+            os.remove(f'{guild_id}.png')
+
 
     @commands.command(aliases=['vtvisible', 'vtvis', 'makevtvisible', 'vtv'])
     @commands.has_permissions(administrator=True)
