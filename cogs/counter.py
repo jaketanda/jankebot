@@ -270,7 +270,7 @@ async def getChart(client, guild, counter_name, num_to_display):
 
     plt.title(title)
 
-    plt.savefig('chart.png')
+    plt.savefig(f'chart{counter_name}{guild_id}.png')
     plt.close()
 
 
@@ -526,8 +526,8 @@ class Counter(commands.Cog):
                         else:
                             command = command[:-5]
                         await getChart(self.client, message.guild, command, 10)
-                        await message.channel.send(file = discord.File("chart.png", "chart.png"))
-                        os.remove("chart.png")
+                        await message.channel.send(file = discord.File(f'chart{command}{guild_id}.png', f'chart{command}{guild_id}.png'))
+                        os.remove(f'chart{command}{guild_id}.png')
                     
                     elif command.endswith(counter_names):
                         if isCensored(guild_id, command):

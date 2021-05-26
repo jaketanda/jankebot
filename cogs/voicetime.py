@@ -225,7 +225,7 @@ async def getChart(client, guild, num_to_display):
 
     plt.bar(left, user_times, tick_label=users, color = ['green', 'blue', 'red', 'purple'])
 
-    plt.savefig(f'{guild_id}.png')
+    plt.savefig(f'voicetime{guild_id}.png')
     plt.close()
 
 class VoiceTime(commands.Cog):
@@ -293,13 +293,13 @@ class VoiceTime(commands.Cog):
 
         if timeIsVisible(guild_id) and not timeIsCensored(guild_id):
             await getChart(self.client, ctx.guild, total)
-            await ctx.reply(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
-            os.remove(f'{guild_id}.png')
+            await ctx.reply(file = discord.File(f'voicetime{guild_id}.png', f'voicetime{guild_id}.png'))
+            os.remove(f'voicetime{guild_id}.png')
 
         elif ctx.channel.permissions_for(ctx.author).administrator:
             await getChart(self.client, ctx.guild, total)
-            await ctx.author.send(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
-            os.remove(f'{guild_id}.png')
+            await ctx.author.send(file = discord.File(f'voicetime{guild_id}.png', f'voicetime{guild_id}.png'))
+            os.remove(f'voicetime{guild_id}.png')
 
 
     @commands.command(aliases=['vtvisible', 'vtvis', 'makevtvisible', 'vtv'])
