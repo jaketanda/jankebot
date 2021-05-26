@@ -185,7 +185,7 @@ def get_media_folder_size(guildId, folderName):
         media = json.load(f)
     if str(guildId) in media and len(media[str(guildId)]) > 0 and folderName in list(media[str(guildId)].keys()):
         return len(media[str(guildId)][folderName])
-    return []
+    return 0
 
 def get_media(guild_id, folder):
     with open('././media.json', 'r') as f:
