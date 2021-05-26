@@ -22,8 +22,7 @@ def getColorGrid(x):
         return 'blue'
 
 def moveSelection(selection, playerNum, spotsToMove):
-    index = 0
-    for item in selection:
+    for index, item in enumerate(selection):
         if item != 0:
             selection[index] = 0
             newPos = index + spotsToMove
@@ -33,15 +32,12 @@ def moveSelection(selection, playerNum, spotsToMove):
                 newPos = 6
             selection[newPos] = playerNum
             break
-        index += 1
     return selection
 
 def isPlacementPossible(selection, grid):
-    pos = 0
-    for item in selection:
+    for pos, item in enumerate(selection):
         if item != 0:
             break
-        pos += 1
 
     height = 5
     while True:
@@ -53,13 +49,11 @@ def isPlacementPossible(selection, grid):
     return False
 
 def updateGrid(selection, grid):
-    pos = 0
     symbol = 0
-    for item in selection:
+    for pos, item in enumerate(selection):
         if item != 0:
             symbol = item
             break
-        pos += 1
 
     height = 5
     while True:
@@ -72,8 +66,7 @@ def updateGrid(selection, grid):
     return grid
 
 def changeSelectionColor(selection):
-    index = 0
-    for item in selection:
+    for index, item in enumerate(selection):
         if item == 1:
             selection[index] = 0
             selection[3] = 2
@@ -82,18 +75,15 @@ def changeSelectionColor(selection):
             selection[index] = 0
             selection[3] = 1
             break
-        index += 1
     return selection
 
 def checkForWinner(selection, grid):
     foundWinner = False
-    pos = 0
     symbol = 0
-    for item in selection:
+    for pos, item in enumerate(selection):
         if item != 0:
             symbol = item
             break
-        pos += 1
 
     height = 5
     for x in range(5):
