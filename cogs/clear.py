@@ -16,7 +16,7 @@ class Clear(commands.Cog):
     async def clear(self, ctx, amount : int):
         """Deletes messages.
         
-        Usage: `clear [# of messages to clear]`
+        Usage: `clear [# of messages to clear (max 100)]`
         """
         if amount > 100:
             amount = 100
