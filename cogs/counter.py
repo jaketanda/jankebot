@@ -221,17 +221,17 @@ async def getChart(client, guild, counter_name, num_to_display):
     counter.pop('censored', None)
     counter.pop('footer', None)
 
-    counter = sorted(counter.items(), key=lambda item: item[1], reverse=True)
+    counterpair = sorted(counter.items(), key=lambda item: item[1], reverse=True)
 
-    if len(counter) > num_to_display:
+    if len(counterpair) > num_to_display:
         left = list(range(1, num_to_display+1))
-        counter = counter[:num_to_display]
+        counterpair = counterpair[:num_to_display]
     else:
-        left = list(range(1, len(counter)+1))
+        left = list(range(1, len(counterpair)+1))
 
     users = []
     user_scores = []
-    for user_id, user_score in counter:
+    for user_id, user_score in counterpair:
         try:
             user = await guild.fetch_member(int(user_id))
             users.append(user.name)
@@ -526,8 +526,11 @@ class Counter(commands.Cog):
                         else:
                             command = command[:-5]
                         await getChart(self.client, message.guild, command, 10)
-                        await message.channel.send(file = discord.File(f'chart{command}{guild_id}.png', f'chart{command}{guild_id}.png'))
-                        os.remove(f'chart{command}{guild_id}.png')
+                        try:
+                            await message.channel.send(file = discord.File(f'chart{command}{guild_id}.png', f'chart{command}{guild_id}.png'))
+                            os.remove(f'chart{command}{guild_id}.png')
+                        except FileNotFoundError:
+                            await message.channel.send(f':x: Error creating chart. Counter most likely censored.')
                     
                     elif command.endswith(counter_names):
                         if isCensored(guild_id, command):
