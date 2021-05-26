@@ -69,7 +69,7 @@ class Dad(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.guild:
-            dadStrings = ['i am ', 'i\'m ', 'i’m ']
+            dadStrings = ['i am ', 'i\'m ', 'i’m ', ' im ']
             userMessage = message.content
             guild_id = str(message.guild.id)
             found = False
