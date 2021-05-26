@@ -50,11 +50,10 @@ async def list_media(self, message, folder_name):
     with open('././media.json', 'r', encoding='utf8') as f:
         media = json.load(f)
     
-    counter = 1
     page = 1
     description = ""
 
-    for item in media[guild_id][folder_name]:
+    for counter, item in enumerate(media[guild_id][folder_name], start=1):
         description += f'{counter}: {item.get("description")}\n'
 
         if counter % 20 == 0:
@@ -68,8 +67,6 @@ async def list_media(self, message, folder_name):
             pages.append(embed)
             description = ""
             page += 1
-
-        counter += 1
 
     if description != "" or page == 1:
         embed = discord.Embed(
@@ -208,11 +205,9 @@ def add_media_with_description(guild_id, folder_name, media):
         media_json = json.load(f)
 
     description = ""
-    counter = 0
-    for arg in media:
+    for counter, arg in enumerate(media):
         if counter >= 2:
             description += f'{str(arg)} '
-        counter += 1
 
     media_json[str(guild_id)][folder_name].append({"content": media[1], "description": description})
 
@@ -233,11 +228,9 @@ def updatedescription(folder, args, discord_id):
         media_json = json.load(f)
 
     description = ""
-    counter = 0
-    for arg in args:
+    for counter, arg in enumerate(args):
         if counter > 1:
             description += f'{arg} '
-        counter+=1
 
     media_json[discord_id][folder][int(args[1])-1]["description"] = description
 
