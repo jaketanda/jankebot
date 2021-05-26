@@ -158,7 +158,7 @@ def displayVoiceTimeLeaders(guild_id, is_censored, number_to_display):
             
     return embed
 
-async def getChart(guild, num_to_display):
+async def getChart(client, guild, num_to_display):
     with open('././voicetime.json', 'r') as f:
         vtjson = json.load(f)
 
@@ -190,9 +190,13 @@ async def getChart(guild, num_to_display):
         try:
             user = await guild.fetch_member(int(user_id))
             users.append(user.name)
-        except :
-            print('user not found')
-            users.append(f'id:{user_id}')
+        except:
+            try:
+                user = await client.fetch_user(int(user_id))
+                users.append(user.name)
+            except:
+                print('user not found')
+                users.append(f'id:{user_id}')
 
         user_times.append(float(user_time)/1000/60/60)
 
@@ -288,12 +292,12 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         if timeIsVisible(guild_id) and not timeIsCensored(guild_id):
-            await getChart(ctx.guild, total)
+            await getChart(self.client, ctx.guild, total)
             await ctx.reply(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
             os.remove(f'{guild_id}.png')
 
         elif ctx.channel.permissions_for(ctx.author).administrator:
-            await getChart(ctx.guild, total)
+            await getChart(self.client, ctx.guild, total)
             await ctx.author.send(file = discord.File(f'{guild_id}.png', f'{guild_id}.png'))
             os.remove(f'{guild_id}.png')
 

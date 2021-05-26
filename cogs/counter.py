@@ -203,9 +203,11 @@ def displayLeaders(guild_id, counter_name, number_to_display):
 
     return embed
 
-async def getChart(guild, guild_id, counter_name, num_to_display):
+async def getChart(client, guild, counter_name, num_to_display):
     with open('././counters.json', 'r') as f:
         counters = json.load(f)
+
+    guild_id = str(guild.id)
 
     counter = counters[guild_id][counter_name]
     title = counter['title']
@@ -232,10 +234,14 @@ async def getChart(guild, guild_id, counter_name, num_to_display):
     for user_id, user_score in counter:
         try:
             user = await guild.fetch_member(int(user_id))
-            users.append(user.display_name)
-        except :
-            print('user not found')
-            users.append(f'id:{user_id}')
+            users.append(user.name)
+        except:
+            try:
+                user = await client.fetch_user(int(user_id))
+                users.append(user.name)
+            except:
+                print('user not found')
+                users.append(f'id:{user_id}')
 
         user_scores.append(user_score)
 
@@ -519,7 +525,7 @@ class Counter(commands.Cog):
                             command = command[:-1]
                         else:
                             command = command[:-5]
-                        await getChart(message.guild, guild_id, command, 10)
+                        await getChart(self.client, message.guild, command, 10)
                         await message.channel.send(file = discord.File("chart.png", "chart.png"))
                         os.remove("chart.png")
                     
