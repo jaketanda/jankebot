@@ -5,6 +5,7 @@ import math
 from discord.ext import commands
 from datetime import datetime, date
 from pytz import timezone
+import random
 
 timezoneString = 'US/Eastern'
 tz = timezone(timezoneString)
@@ -48,6 +49,14 @@ def getYearProgress():
     yearPercent = math.floor(day_of_year/days_in_this_year * 100)
     return f'{getPercentBar(yearPercent)} {yearPercent}%'
 
+def getLifeProgress(user_id):
+    day_of_year = datetime.now().timetuple().tm_yday
+    seed = day_of_year + user_id
+    random.seed(seed)
+
+    lifePercent = random.randint(20, 99)
+    return f'{getPercentBar(lifePercent)} {lifePercent}%'
+
 class Progress(commands.Cog):
     """Check the progress of the year, month, and day"""
     def __init__(self, client):
@@ -88,6 +97,15 @@ class Progress(commands.Cog):
         Usage: progress"""
         print('progress')
         await ctx.reply(f'{getDayProgress()} - Day ({timezoneString})\n{getMonthProgress()} - Month\n{getYearProgress()} - Year')
+
+    @commands.command(aliases=['lifeprog', 'progresslife', 'proglife'])
+    async def lifeprogress(self, ctx):
+        """Get the progress of your life - 100% accurate
+        
+        Usage: lifeprogress"""
+        print('lifeprogress')
+        await ctx.reply(f'Your life progress: {getLifeProgress(ctx.author.id)}')
+
 
 def setup(client):
     client.add_cog(Progress(client))
