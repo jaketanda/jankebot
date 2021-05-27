@@ -14,7 +14,7 @@ class Amirite(commands.Cog):
     async def amirite(self, ctx):
         """hell yeah, brother"""
         print('amirite')
-        await ctx.send('hell yeah, brother')
+        await ctx.reply('hell yeah, brother')
 
 def setup(client):
     client.add_cog(Amirite(client))
