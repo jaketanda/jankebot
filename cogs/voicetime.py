@@ -195,7 +195,6 @@ async def getChart(client, guild, num_to_display):
                 user = await client.fetch_user(int(user_id))
                 users.append(user.name)
             except:
-                print('user not found')
                 users.append(f'id:{user_id}')
 
         user_times.append(float(user_time)/1000/60/60)
@@ -233,10 +232,6 @@ class VoiceTime(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('VoiceTime loaded...')
-
     @commands.command(aliases=['vt'])
     async def voicetime(self, ctx):
         """Check how much time you've spent in voice chat
@@ -272,7 +267,6 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         if timeIsVisible(guild_id):
-            print(f'voicetime leaders {total}')
             if timeIsCensored(guild_id):
                 await ctx.send(embed=displayVoiceTimeLeaders(guild_id, True, total))
             else:
@@ -313,7 +307,6 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
         
         if not timeIsVisible(guild_id):
-            print('voicetime visible')
             toggleVoiceTimeVisibility(guild_id)
         
         await ctx.send(f':white_check_mark: Voice time leaderboards are now visible! - Type `voicetimeleaderboard` to check the leaderboard!')
@@ -329,7 +322,6 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         if timeIsVisible(guild_id):
-            print('voicetime invisible')
             toggleVoiceTimeVisibility(guild_id)
         
         await ctx.send(f':white_check_mark: Voice time leaderboards are now invisible! - Type `makevoicetimevisible` to make these visible again!')
@@ -344,7 +336,6 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         if not timeIsCensored(guild_id):
-            print('voicetime censored')
             toggleVoiceTimeCensorship(guild_id)
 
         await ctx.send(f':white_check_mark: Voice time leaderboard times are now censored!')
@@ -359,7 +350,6 @@ class VoiceTime(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         if timeIsCensored(guild_id):
-            print('voicetime uncensored')
             toggleVoiceTimeCensorship(guild_id)
 
         await ctx.send(f':white_check_mark: Voice time leaderboard times are now uncensored!')

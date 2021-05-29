@@ -27,16 +27,11 @@ class MessageHighlight(commands.Cog):
 
     @commands.command(aliases=['gom'])
     async def getoldmessage(self, ctx, days_ago=0):
-        print(f'getoldmessage --da {days_ago}')
         if days_ago < 0:
             await ctx.send(':no_entry: Days must be greater than 0')
             return
         
         await getom(ctx.channel, days_ago)
-  
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('MessageHighlight loaded...')
 
 def setup(client):
     client.add_cog(MessageHighlight(client))

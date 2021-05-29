@@ -7,10 +7,6 @@ class Clear(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Clear loaded...')
-
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount : int):
@@ -20,11 +16,11 @@ class Clear(commands.Cog):
         """
         if amount > 100:
             amount = 100
-        print(f'clear {amount}')
         await ctx.channel.purge(limit=amount+1)
         
         clear_message = await ctx.send(f':white_check_mark: Cleared {amount} messages')
         time.sleep(4)
+
         try:
             await clear_message.delete()
         except:

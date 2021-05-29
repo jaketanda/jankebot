@@ -16,10 +16,6 @@ class Tasks(commands.Cog):
 
     def cog_unload(self):
         self.change_status.cancel()
-  
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Tasks loaded...')
 
     @tasks.loop(seconds=1800)
     async def change_status(self):

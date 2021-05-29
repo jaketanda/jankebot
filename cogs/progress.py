@@ -62,16 +62,11 @@ class Progress(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Progress loaded...')
-
     @commands.command(aliases=['dayprog', 'progday', 'progressday'])
     async def dayprogress(self, ctx):
         """Get the progress of the current day in percentage form
         
         Usage: dayprogress"""
-        print('dayprogress')
         await ctx.reply(f'Day ({timezoneString}) progress: {getDayProgress()}')
 
     @commands.command(aliases=['monthprog', 'progmonth', 'progressmonth'])
@@ -79,7 +74,6 @@ class Progress(commands.Cog):
         """Get the progress of the current month in percentage form
         
         Usage: monthprogress"""
-        print('monthprogress')
         await ctx.reply(f'Month progress: {getMonthProgress()}')
 
     @commands.command(aliases=['yearprog', 'progyear', 'progressyear'])
@@ -87,7 +81,6 @@ class Progress(commands.Cog):
         """Get the progress of the current year in percentage form
         
         Usage: yearprogress"""
-        print('yearprogress')
         await ctx.reply(f'Year progress: {getYearProgress()}')
 
     @commands.command(aliases=['prog'])
@@ -95,7 +88,6 @@ class Progress(commands.Cog):
         """Get the progress of the current year, day, and month in percentage form
         
         Usage: progress"""
-        print('progress')
         await ctx.reply(f'{getDayProgress()} - Day ({timezoneString})\n{getMonthProgress()} - Month\n{getYearProgress()} - Year')
 
     @commands.command(aliases=['lifeprog', 'progresslife', 'proglife'])
@@ -103,7 +95,6 @@ class Progress(commands.Cog):
         """Get the progress of your life - 100% accurate
         
         Usage: lifeprogress"""
-        print('lifeprogress')
         await ctx.reply(f'Your life progress: {getLifeProgress(ctx.author.id)}')
 
 

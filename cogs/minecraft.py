@@ -25,10 +25,6 @@ class Minecraft(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Minecraft loaded...')
-
     @commands.command(aliases=['minecraft'])
     async def mc(self, ctx, ip : str='-1'):
         """Information retrieval of Minecraft servers
@@ -39,7 +35,6 @@ class Minecraft(commands.Cog):
         if api_ip == '-1':
             api_ip = get_default_ip(ctx)
         if api_ip != '-1':
-            print(f'mc {api_ip}')
             response = requests.get(f'https://api.mcsrvstat.us/2/{api_ip}')
             
             if response.json()["online"] == True:

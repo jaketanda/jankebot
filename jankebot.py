@@ -1,7 +1,18 @@
 import discord
 import os
 from discord.ext import commands, tasks
+import logging
 import json
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S', 
+    handlers=[
+        logging.FileHandler("./logs/janke.log"),
+        logging.StreamHandler()
+    ]
+)
 
 def get_prefix(client, message):
     with open('prefixes.json', 'r') as prefixFile:
@@ -22,6 +33,69 @@ def is_it_jake(ctx):
 
 client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents().all())
 
+def isACounter(command, guild_id):
+    with open('counters.json', 'r') as cFile:
+        counterJson = json.load(cFile)
+
+    if command.endswith('l') or command.endswith('leaders') or command.endswith('leaderboard'):
+        if (command.endswith('l')):
+            command = command[:-1]
+        elif command.endswith('leaders'):
+            command = command[:-7]
+        elif command.endswith('leaderboard'):
+            command = command[:-11]
+    elif command.endswith('c') or command.endswith('chart') or command.endswith('g') or command.endswith('graph'):
+        if (command.endswith('c') or command.endswith('g')):
+            command = command[:-1]
+        else:
+            command = command[:-5]
+
+    if counterJson[guild_id] and command in list(counterJson[guild_id].keys()):
+        return True
+
+    return False
+
+def isAMediaFolder(command, guild_id):
+    with open('media.json', 'r') as mFile:
+        mediaJson = json.load(mFile)
+
+    if mediaJson[guild_id] and command in list(mediaJson[guild_id].keys()):
+        return True
+
+    return False    
+
+def message_contains_command(message):
+    guild_id = str(message.guild.id)
+    prefix = get_prefix(client, message)
+
+    if message.content.lower().startswith(prefix):
+        full_command = message.content.lower()[len(prefix):]
+        command = full_command.split()[0].lower()
+
+        if isACounter(command, guild_id) or isAMediaFolder(command, guild_id):
+            return True
+
+    return False
+
+# Log all normal commands
+@client.listen(name='on_command')
+async def log_commands(ctx):
+    guild = ctx.guild.name
+    user = ctx.author.name
+    user_discriminator = ctx.author.discriminator
+    command = ctx.message.content
+    logging.info(f'{guild} - {user}#{user_discriminator} - {command}')
+
+# Log modular commands
+@client.listen(name='on_message')
+async def log_modular_commands(message):
+    if message_contains_command(message):
+        guild = message.guild.name
+        user = message.author.name
+        user_discriminator = message.author.discriminator
+        command = message.content
+        logging.info(f'{guild} - {user}#{user_discriminator} - {command}')
+
 # Reload config
 @client.command()
 @commands.check(is_it_jake)
@@ -39,7 +113,7 @@ async def reload(ctx, extension):
     extension = extension.lower()
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
-    print(f'Reloaded {extension}')
+    logging.info(f'Reloaded {extension}')
     await ctx.send(f':gear: Reloaded {extension}')
 
 # Load extension
@@ -48,7 +122,7 @@ async def reload(ctx, extension):
 async def load(ctx, extension):
     extension = extension.lower()
     client.load_extension(f'cogs.{extension}')
-    print(f'Loaded {extension}')
+    logging.info(f'Loaded {extension}')
     await ctx.send(f':gear: Loaded {extension}')
 
 # Unload extension
@@ -57,15 +131,15 @@ async def load(ctx, extension):
 async def unload(ctx, extension):
     extension = extension.lower()
     client.unload_extension(f'cogs.{extension}')
-    print(f'Unloaded {extension}')
+    logging.info(f'Unloaded {extension}')
     await ctx.send(f':gear: Unloaded {extension}')
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.ExtensionNotLoaded):
-        print(':no_entry: Extension not loaded')
+        logging.error(':no_entry: Extension not loaded')
     elif isinstance(error, commands.ExtensionAlreadyLoaded):
-        print(':no_entry: Extension already loaded')
+        logging.error(':no_entry: Extension already loaded')
 
 @client.event
 async def on_guild_join(guild):
@@ -150,10 +224,14 @@ async def changeprefix(ctx, prefix):
 
 @client.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord')
+    logging.info(f'{client.user} has connected to Discord')
 
+logging.info('Loading cogs =-=-=-=-=-=-=-=-=-=-=-=-=-=')
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
+        logging.info(f'{filename[:-3].capitalize()} loaded...')
+
+logging.info('Finished loading cogs =-=-=-=-=-=-=-=-=-')
 
 client.run(TOKEN)

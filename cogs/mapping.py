@@ -42,17 +42,12 @@ class Mapping(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Mapping loaded...')
-
     @commands.command(aliases=['maps'])
     async def mappings(self, ctx):
         """List mappings of user IDs to nicknames
         
         Usage: `mappings`
         """
-        print('mappings')
         with open('././mappings.json', 'r') as f:
             media = json.load(f)
 
@@ -87,8 +82,6 @@ class Mapping(commands.Cog):
             await ctx.send(':no_entry: One of the arguments must be a user `@`!')
             return
 
-        print(f'addmapping {arg1} {arg2}')
-
         guild_id = str(ctx.guild.id)
         
         with open('././mappings.json', 'r') as f:
@@ -116,7 +109,6 @@ class Mapping(commands.Cog):
         
         Usage: `removemapping [user @/nickname]`
         """
-        print(f'removemap {arg1}')
 
         with open('././mappings.json', 'r') as f:
             mapping_json = json.load(f)
@@ -128,7 +120,6 @@ class Mapping(commands.Cog):
 
             if id in mapping_json[guild_id].keys():
                 mapping_json[guild_id].pop(id)
-                print(f'here2')
                 #await ctx.message.purge(limit=1)
                 await ctx.send(f'Removed ID `{id}` from mappings!')
 

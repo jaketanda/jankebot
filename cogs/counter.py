@@ -239,8 +239,7 @@ async def getChart(client, guild, counter_name, num_to_display):
             try:
                 user = await client.fetch_user(int(user_id))
                 users.append(user.name)
-            except:
-                print('user not found')
+            except: # User not found
                 users.append(f'id:{user_id}')
 
         user_scores.append(user_score)
@@ -287,10 +286,6 @@ class Counter(commands.Cog):
     """Counters - for all of your additive needs!"""
     def __init__(self, client):
         self.client = client
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Counter loaded...')
 
     @commands.command(aliases=['counterl', 'counterlist', 'listcounters'])
     async def counters(self, ctx):
@@ -485,7 +480,6 @@ class Counter(commands.Cog):
 
             if message.content.lower().startswith(prefix):
                 line = message.content.lower()[len(prefix):]
-                print(line)
                 command = line.split()[0]
 
 

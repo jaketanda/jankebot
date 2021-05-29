@@ -264,10 +264,6 @@ def is_it_jake(ctx):
 class Media(commands.Cog):
     def __init__(self, client):
         self.client = client
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Media loaded...')
     
     @commands.command()
     async def media(self, ctx):
@@ -297,7 +293,6 @@ class Media(commands.Cog):
         Usage: `addfolder [Folder name]`
         """
 
-        print('here')
         check = addfolder(ctx, folder_name.lower())
         if check == -1:
             await ctx.send(f'Folder {folder_name.lower().capitalize()} already exists!')
@@ -359,7 +354,6 @@ class Media(commands.Cog):
         Usage: `transfer [Folder name]`
         """
 
-        print(f'transfer {folder_name}')
         guild_id = str(ctx.guild.id)
         with open("././jankeMedia.json", "r", encoding="utf8") as f:
             old_media = json.load(f)

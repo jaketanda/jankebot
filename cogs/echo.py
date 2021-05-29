@@ -6,10 +6,6 @@ class Echo(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Echo loaded...')
-
     @commands.command()
     async def echo(self, ctx, *, message : str):
         """ECHO ECHo ECho Echo echo
@@ -17,7 +13,6 @@ class Echo(commands.Cog):
         
         Usage: `echo [message]`
         """
-        print(f'<@!{ctx.message.author.id}> - echo {message}')
         await ctx.channel.purge(limit=1)
         await ctx.send(message)
 

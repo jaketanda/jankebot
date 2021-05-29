@@ -6,10 +6,6 @@ class Invite(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Invite loaded...')
-
     @commands.command(aliases=['getinv', 'invite', 'inv'])
     @commands.has_permissions(attach_files=True)
     async def getinvite(self, ctx, guildId = '0'):

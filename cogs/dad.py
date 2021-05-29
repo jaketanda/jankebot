@@ -28,10 +28,6 @@ class Dad(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Dad loaded...')
-
     @commands.command(aliases=['dad'])
     @commands.has_permissions(manage_channels=True)
     async def dadbot(self, ctx, status='toggle'):

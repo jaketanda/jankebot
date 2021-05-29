@@ -282,10 +282,6 @@ class ConnectFour(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print('Connect-Four loaded...')
-
     @commands.command(aliases = ['connect4', 'c4', 'cfour'])
     async def connectfour(self, ctx, player_two:str):
         """connectfour
