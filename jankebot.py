@@ -4,15 +4,25 @@ from discord.ext import commands, tasks
 import logging
 import json
 
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    level=logging.INFO,
-    datefmt='%Y-%m-%d %H:%M:%S', 
-    handlers=[
-        logging.FileHandler("./logs/janke.log"),
-        logging.StreamHandler()
-    ]
-)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+
+def setup_logger(name, log_file, level=logging.INFO):
+
+    handler = logging.FileHandler(log_file)        
+    handler.setFormatter(formatter)
+
+    streamHandler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    logger.addHandler(streamHandler)
+
+    return logger
+
+logger = setup_logger('command', './logs/janke.log')
+setup_logger('voice', './logs/voice.log')
 
 def get_prefix(client, message):
     with open('prefixes.json', 'r') as prefixFile:
@@ -84,7 +94,7 @@ async def log_commands(ctx):
     user = ctx.author.name
     user_discriminator = ctx.author.discriminator
     command = ctx.message.content
-    logging.info(f'{guild} - {user}#{user_discriminator} - {command}')
+    logger.info(f'{guild} - {user}#{user_discriminator} - {command}')
 
 # Log modular commands
 @client.listen(name='on_message')
@@ -94,7 +104,7 @@ async def log_modular_commands(message):
         user = message.author.name
         user_discriminator = message.author.discriminator
         command = message.content
-        logging.info(f'{guild} - {user}#{user_discriminator} - {command}')
+        logger.info(f'{guild} - {user}#{user_discriminator} - {command}')
 
 # Reload config
 @client.command()
@@ -113,7 +123,7 @@ async def reload(ctx, extension):
     extension = extension.lower()
     client.unload_extension(f'cogs.{extension}')
     client.load_extension(f'cogs.{extension}')
-    logging.info(f'Reloaded {extension}')
+    logger.info(f'Reloaded {extension}')
     await ctx.send(f':gear: Reloaded {extension}')
 
 # Load extension
@@ -122,7 +132,7 @@ async def reload(ctx, extension):
 async def load(ctx, extension):
     extension = extension.lower()
     client.load_extension(f'cogs.{extension}')
-    logging.info(f'Loaded {extension}')
+    logger.info(f'Loaded {extension}')
     await ctx.send(f':gear: Loaded {extension}')
 
 # Unload extension
@@ -131,15 +141,15 @@ async def load(ctx, extension):
 async def unload(ctx, extension):
     extension = extension.lower()
     client.unload_extension(f'cogs.{extension}')
-    logging.info(f'Unloaded {extension}')
+    logger.info(f'Unloaded {extension}')
     await ctx.send(f':gear: Unloaded {extension}')
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.ExtensionNotLoaded):
-        logging.error(':no_entry: Extension not loaded')
+        logger.error(':no_entry: Extension not loaded')
     elif isinstance(error, commands.ExtensionAlreadyLoaded):
-        logging.error(':no_entry: Extension already loaded')
+        logger.error(':no_entry: Extension already loaded')
 
 @client.event
 async def on_guild_join(guild):
@@ -224,14 +234,14 @@ async def changeprefix(ctx, prefix):
 
 @client.event
 async def on_ready():
-    logging.info(f'{client.user} has connected to Discord')
+    logger.info(f'{client.user} has connected to Discord')
 
-logging.info('Loading cogs =-=-=-=-=-=-=-=-=-=-=-=-=-=')
+logger.info('Loading cogs =-=-=-=-=-=-=-=-=-=-=-=-=-=')
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
-        logging.info(f'{filename[:-3].capitalize()} loaded...')
+        logger.info(f'{filename[:-3].capitalize()} loaded...')
 
-logging.info('Finished loading cogs =-=-=-=-=-=-=-=-=-')
+logger.info('Finished loading cogs =-=-=-=-=-=-=-=-=-')
 
 client.run(TOKEN)

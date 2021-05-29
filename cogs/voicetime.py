@@ -3,7 +3,10 @@ import json
 import time
 import os
 import matplotlib.pyplot as plt
+import logging
 from discord.ext import commands
+
+voiceLogger = logging.getLogger('voice')
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -359,12 +362,15 @@ class VoiceTime(commands.Cog):
         user_id = str(member.id)
         guild_id = str(member.guild.id)
 
+        guild = member.guild.name
+        member_discriminator = member.discriminator
+
         if not before.channel and after.channel: #joined
-            print(f'{member.name} joined {after.channel.name}')
+            voiceLogger.info(f'{member.name}#{member_discriminator} joined {after.channel.name} - {guild}')
             updateUserJoinsVoice(guild_id, user_id)
 
         elif before.channel and not after.channel: #left
-            print(f'{member.name} left {before.channel.name}')
+            voiceLogger.info(f'{member.name}#{member_discriminator} left {before.channel.name} - {guild}')
             updateUserLeavesVoice(guild_id, user_id)
 
 def setup(client):
