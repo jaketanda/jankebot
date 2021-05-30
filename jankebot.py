@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import logging
 import json
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 
 def setup_logger(name, log_file, level=logging.INFO):
 
@@ -60,7 +60,7 @@ def isACounter(command, guild_id):
         else:
             command = command[:-5]
 
-    if counterJson[guild_id] and command in list(counterJson[guild_id].keys()):
+    if guild_id in list(counterJson.keys()) and command in list(counterJson[guild_id].keys()):
         return True
 
     return False
