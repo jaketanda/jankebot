@@ -4,7 +4,7 @@ from discord.ext import commands, tasks
 import logging
 import json
 
-formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 def setup_logger(name, log_file, level=logging.INFO):
 
@@ -12,7 +12,7 @@ def setup_logger(name, log_file, level=logging.INFO):
     handler.setFormatter(formatter)
 
     streamHandler = logging.StreamHandler()
-    handler.setFormatter(formatter)
+    streamHandler.setFormatter(formatter)
 
     logger = logging.getLogger(name)
     logger.setLevel(level)
