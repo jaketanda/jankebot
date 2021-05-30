@@ -366,11 +366,11 @@ class VoiceTime(commands.Cog):
         member_discriminator = member.discriminator
 
         if not before.channel and after.channel: #joined
-            voiceLogger.info(f'{member.name}#{member_discriminator} joined {after.channel.name} - {guild}')
+            voiceLogger.info(f'{guild} - {member.name}#{member_discriminator} joined {after.channel.name}')
             updateUserJoinsVoice(guild_id, user_id)
 
         elif before.channel and not after.channel: #left
-            voiceLogger.info(f'{member.name}#{member_discriminator} left {before.channel.name} - {guild}')
+            voiceLogger.info(f'{guild} - {member.name}#{member_discriminator} left {before.channel.name}')
             updateUserLeavesVoice(guild_id, user_id)
 
 def setup(client):
