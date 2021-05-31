@@ -12,10 +12,10 @@ tz = timezone(timezoneString)
 
 def getPercentBar(percentage, length=32, whiteChar='▓', grayChar='░'):
     percentageStrings = []
-    for i in range(length):
+    for i in range(length + 1):
         percentageStrings.append(whiteChar * i + grayChar * (length - i))
     
-    return percentageStrings[math.floor(percentage/100 * len(percentageStrings))]
+    return percentageStrings[math.floor(percentage/100 * length)]
 
 def getDaysInThisMonth(currentMonth, year):
     daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
