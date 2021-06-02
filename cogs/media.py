@@ -255,6 +255,53 @@ def addfolder(ctx, folder_name : str):
 
         return 0
 
+def guildMediaTransfer(from_guild, to_guild):
+    def writeMedia(media):
+        with open ('././media.json', 'w') as f:
+            json.dump(media, f, indent=4)
+
+    with open('././media.json', 'r') as f:
+        media = json.load(f)
+
+    # Nothing in both
+    if (from_guild not in media and to_guild not in media) or (media.get(from_guild) == {} and media.get(to_guild) == {}):
+        return 0
+
+    # Nothing in to, but stuff in from
+    if (to_guild not in media or media.get(to_guild) == {}) and from_guild in media:
+        media[to_guild] = media[from_guild]
+        writeMedia(media)
+        return 1
+
+    # Nothing in from, but stuff in to
+    if (from_guild not in media or media.get(from_guild) == {}) and to_guild in media:
+        return 0
+
+    # Stuff in both
+    if from_guild in media and to_guild in media:
+        for folder_name in media[from_guild]:
+            # to has folder
+            if folder_name in media[to_guild]:
+                for from_media_object in media[from_guild][folder_name]:
+                    found = False
+
+                    for to_media_object in media[to_guild][folder_name]:
+                        if from_media_object['content'] == to_media_object['content']:
+                            found = True
+                            break
+
+                    if not found:
+                        media[to_guild][folder_name].append(from_media_object)
+
+            # to doesn't have folder
+            else:
+                media[to_guild][folder_name] = media[from_guild][folder_name]
+
+        writeMedia(media)
+        return 1
+
+            
+
 def is_it_jake(ctx):
     with open('././config.json', "r") as configFile:
         config = json.load(configFile)
@@ -371,6 +418,26 @@ class Media(commands.Cog):
             await ctx.send(f'Successfully transferred {folder_name}!')
         else:
             await ctx.send(f':no_entry: Old folder {folder_name} not found!')
+
+    @commands.command()
+    @commands.has_permissions(manage_messages=True)
+    async def transferto(self, ctx, to_guild_id):
+        async with ctx.channel.typing():
+            return_value = guildMediaTransfer(str(ctx.guild.id), to_guild_id)
+            if return_value == 1:
+                await ctx.reply(f'✅ Transferred media to guild with ID `{to_guild_id}`')
+            else:
+                await ctx.reply(f':no_entry: Error transferring media')
+
+    @commands.command()
+    @commands.has_permissions(manage_messages=True)
+    async def transferfrom(self, ctx, from_guild_id):
+        async with ctx.channel.typing():
+            return_value = guildMediaTransfer(from_guild_id, str(ctx.guild.id))
+            if return_value == 1:
+                await ctx.reply(f'✅ Transferred media from guild with ID `{from_guild_id}` to this guild')
+            else:
+                await ctx.reply(f':no_entry: Error transferring media')
 
     @commands.Cog.listener()
     async def on_message(self, message):
