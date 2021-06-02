@@ -390,9 +390,9 @@ class Media(commands.Cog):
                 prefix = '!'
 
             if message.content.lower().startswith(prefix):
-                messageArray = message.content.lower().split()
+                messageArray = message.content.split()
 
-                command = messageArray[0][len(prefix):]
+                command = messageArray[0][len(prefix):].lower()
                 if len(messageArray) > 1:
                     args = messageArray[1:]
                 else:
@@ -422,11 +422,11 @@ class Media(commands.Cog):
                             await displayMedia(self, command, int(args[0])-1, guildId, message)
 
                     # [Folder name] list
-                    elif args[0] == 'list':
+                    elif args[0].lower() == 'list':
                         await list_media(self, message, command)
 
                     # [Folder name] add [media] [Description (optional)]
-                    elif len(args) > 1 and args[0] == 'add':
+                    elif len(args) > 1 and args[0].lower() == 'add':
                         if len(args) > 2:
                             add_media_with_description(guildId, command, args)
                         else:
@@ -435,7 +435,7 @@ class Media(commands.Cog):
                         await ctx.send(f'✅ Added media to `{command}`')
 
                     # [Folder name] remove [Positive integer]
-                    elif len(args) == 2 and args[0] in ['remove', 'delete'] and RepresentsInt(args[1]):
+                    elif len(args) == 2 and args[0].lower() in ['remove', 'delete'] and RepresentsInt(args[1]):
                         if int(args[1]) <= 0 or int(args[1]) > folderSize:
                             await ctx.send(f':no_entry: Invalid number. Valid numbers: `1-{folderSize}`')
                         else:
@@ -443,7 +443,7 @@ class Media(commands.Cog):
                             await message.add_reaction('✅')
 
                     # [Folder name] updatedescription [Positive integer] [New description]
-                    elif len(args) > 2 and args[0] in ['updatedescription', 'updatedesc', 'ud'] and RepresentsInt(args[1]):
+                    elif len(args) > 2 and args[0].lower() in ['updatedescription', 'updatedesc', 'ud'] and RepresentsInt(args[1]):
                         if int(args[1]) <= 0 or int(args[1]) > folderSize:
                             await ctx.send(f':no_entry: Invalid number. Valid numbers: `1-{folderSize}`')
                         else:
